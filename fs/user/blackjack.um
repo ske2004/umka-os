@@ -145,18 +145,19 @@ fn getValues(cards: []^Card): ([]int, int) {
         values = append(values, sum - start)
     }
 
+    // Every ace counts as 1 first, then the first ace becomes 11 if that does not bust.
     for i, card in cards {
         if card.value == Value.ace {
-            if sum == 10 {
-                values[i] = 11 
-                sum += 11
-            } else if sum + 10 <= 21 {
-                values[i] = 10
-                sum += 10
-            } else {
-                values[i] = 1
-                sum += 1
-            }
+            values[i] = 1
+            sum += 1
+        }
+    }
+
+    for i, card in cards {
+        if card.value == Value.ace && sum + 10 <= 21 {
+            values[i] = 11
+            sum += 10
+            break
         }
     }
 
