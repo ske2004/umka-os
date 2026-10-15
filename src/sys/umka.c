@@ -63,7 +63,9 @@ static void api__asm_cli(UmkaStackSlot *p, UmkaStackSlot *r) { asm("cli"); }
 static void api__asm_sti(UmkaStackSlot *p, UmkaStackSlot *r) { asm("sti"); }
 
 static void api__setupTypePtr(UmkaStackSlot *p, UmkaStackSlot *r) {
-  umkaTypes[umkaGetParam(p, 0)->uintVal] = umkaGetParam(p, 1)->ptrVal;
+  size_t index = umkaGetParam(p, 0)->uintVal;
+  assert(index < sizeof(umkaTypes) / sizeof(umkaTypes[0]));
+  umkaTypes[index] = umkaGetParam(p, 1)->ptrVal;
 }
 
 static void api__getaddr(UmkaStackSlot *p, UmkaStackSlot *r) {
@@ -99,7 +101,8 @@ static void api__reads(UmkaStackSlot *p, UmkaStackSlot *r) {
   size_t len = umkaGetParam(p, 1)->uintVal;
 
   char *str = malloc(len + 1);
-  memcpy(str, p[1].ptrVal, len);
+  assert(str);
+  memcpy(str, data, len);
   str[len] = '\0';
 
   umkaGetResult(p, r)->ptrVal = umkaMakeStr(umka, str);
