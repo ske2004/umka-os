@@ -99,7 +99,7 @@ static void api__reads(UmkaStackSlot *p, UmkaStackSlot *r) {
   size_t len = umkaGetParam(p, 1)->uintVal;
 
   char *str = malloc(len + 1);
-  memcpy(str, p[1].ptrVal, len);
+  memcpy(str, data, len);
   str[len] = '\0';
 
   umkaGetResult(p, r)->ptrVal = umkaMakeStr(umka, str);

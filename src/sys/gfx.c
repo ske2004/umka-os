@@ -107,6 +107,8 @@ void gfxSetPixel(int x, int y, uint32_t color) {
 }
 
 void gfxDoDrawIcon(int px, int py, char c) {
+  if (c < 0 || (c + 1) * 12 > icon_desc.width)
+    return;
   for (int x = 0; x < 12; x++) {
     for (int y = 0; y < 16; y++) {
       int ix = x + c * 12;
@@ -121,6 +123,8 @@ void gfxDoDrawIcon(int px, int py, char c) {
 
 extern char font8x8_basic[128][8];
 void gfxDoDrawChar(int x, int y, char c) {
+  if ((unsigned char)c >= 128)
+    return;
   for (int i = 0; i < 8; i++) {
     for (int j = 0; j < 8; j++) {
       if (font8x8_basic[c][i] & (1 << j)) {

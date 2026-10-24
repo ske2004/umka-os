@@ -126,7 +126,7 @@ const char basetbl[256] = {
     ['c'] = 12, ['d'] = 13, ['e'] = 14, ['f'] = 15};
 
 unsigned long long fmtParseNum(RWStream *s, int base) {
-  char buf[64] = {0};
+  char buf[65] = {0};
   s->peek(s, buf, 64);
   char *nptr = buf;
 

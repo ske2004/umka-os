@@ -43,5 +43,19 @@ int main() {
   assert(!vfsExists("subdir/test2.txt"));
   assert(vfsExists("subdir/../subdir/test1.txt"));
 
+  // Boundary checks: read past EOF should safely return 0
+  s = vfsOpen("test1.txt", "rb");
+  assert(s);
+  vfsSeek(s, 100, 0);
+  assert(vfsRead(s, buf, sizeof(buf)) == 0);
+  vfsClose(s);
+
+  // Path with > 32 segments should safely fail without stack overflow
+  assert(!vfsExists("a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/x/y/z/1/2/3/4/5/6/7"));
+  assert(!vfsExists("a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/x/y/z/1/2/3/4/5/6/7/"));
+
+  // Filename longer than 31 chars should safely truncate without corrupting adjacent Node pointers
+  assert(vfsCreate("long_file_name_exceeding_node_filename_limit.txt") == 0);
+
   printf("OK\n");
 }

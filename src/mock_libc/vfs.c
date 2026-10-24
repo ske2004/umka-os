@@ -51,7 +51,8 @@ Node *vfsAlloc(Node *node, const char *file) {
   new->parent = node;
   new->child = NULL;
   new->sibling = NULL;
-  strcpy(new->filename, file);
+  strncpy(new->filename, file, sizeof(new->filename) - 1);
+  new->filename[sizeof(new->filename) - 1] = 0;
 
   if (node->child == NULL) {
     node->child = new;
@@ -112,6 +113,7 @@ void vfsFree(Node *node) {
 }
 
 Node *vfsGetPath(const char *path, bool base) {
+  Node *node = NULL;
   char *sub[32];
   size_t sub_idx = 0;
 
@@ -120,6 +122,10 @@ Node *vfsGetPath(const char *path, bool base) {
   for (int i = 0; path[i]; i++) {
     if (path[i] == '/') {
       if (n > 0) {
+        if (sub_idx >= 32) {
+          node = NULL;
+          goto cleanup;
+        }
         sub[sub_idx] = malloc(n + 1);
         sub[sub_idx][n] = 0;
         memcpy(sub[sub_idx++], path + i - n, n);
@@ -132,6 +138,10 @@ Node *vfsGetPath(const char *path, bool base) {
 
   // last
   if (n > 0) {
+    if (sub_idx >= 32) {
+      node = NULL;
+      goto cleanup;
+    }
     sub[sub_idx] = malloc(n + 1);
     sub[sub_idx][n] = 0;
     memcpy(sub[sub_idx++], path + strlen(path) - n, n);
@@ -143,7 +153,7 @@ Node *vfsGetPath(const char *path, bool base) {
   }
 
   // find path
-  Node *node = vfs.root;
+  node = vfs.root;
   for (int i = 0; i < sub_idx; i++) {
     if (strcmp(sub[i], "..") == 0) {
       if (node->parent == NULL) {
@@ -256,6 +266,9 @@ void vfsClose(Stream *stream) {
 
 size_t vfsRead(Stream *stream, void *dest, size_t size) {
   assert(stream);
+  if (stream->i >= stream->node->datasize) {
+    return 0;
+  }
   size_t readsize = stream->node->datasize - stream->i;
   if (readsize > size) {
     readsize = size;
